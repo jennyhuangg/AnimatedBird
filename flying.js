@@ -58,56 +58,32 @@ window.onload = function init()
 
 };
 
-function birdFaceToVertProperties(verts, tris, norms){
-  var new_verts = [
-    verts[0], verts[2], verts[1],
-    verts[0], verts[3], verts[2],
-    verts[4], verts[7], verts[3],
-    verts[4], verts[3], verts[0],
-    verts[5], verts[4], verts[0],
-    verts[5], verts[0], verts[1],
-    verts[5], verts[1], verts[2],
-    verts[5], verts[2], verts[6],
-    verts[6], verts[2], verts[3],
-    verts[6], verts[3], verts[7],
-    verts[5], verts[6], verts[4],
-    verts[4], verts[6], verts[7]
-  ];
+function birdFaceToVertProperties(vertices, indices, norms1)
+{
+    var verts = [];
+    var tris = [];
+    var vert_colors = [];
+    var norms = [];
+    for ( var i = 0; i < indices.length; ++i) {
+      verts.push(vertices[indices[i]]);
+      tris.push(i);
+    }
+    for ( var i = 0; i < norms1.length; ++i) {
+      norms.push(norms1[i], norms1[i], norms1[i]);
+    }
 
-  var new_tris = [
-    0, 1, 2,
-    3, 4, 5,
-    6, 7, 8,
-    9, 10, 11,
-    12, 13, 14,
-    15, 16, 17,
-    18, 19, 20,
-    21, 22, 23,
-    24, 25, 26,
-    27, 28, 29,
-    30, 31, 32,
-    33, 34, 35
-  ];
-
-  var new_norms = [];
-  for (var i = 0; i < norms.length; i ++){
-    new_norms.push(norms[i]);
-    new_norms.push(norms[i]);
-    new_norms.push(norms[i]);
-  }
-
-  return {
-    verts: new_verts,
-    tris: new_tris,
-    norms: new_norms
-  };
+    return {
+      verts: verts,
+      tris: tris,
+      norms: norms
+    };
 }
 
 function bird() {
   var verts = [
     vec4(0, 0, 0.5, 1),
+    vec4(0, -0.5, 0, 1),
     vec4(0, 0.5, 0, 1),
-    vec4(0, -0.5, 0.05, 1),
     vec4(3, 0, 0, 1),
   ];
 
@@ -117,13 +93,13 @@ function bird() {
     [1, 3, 2],
     [0, 2, 3]];
 
-  var norms = []
-  for (var i = 0; i < tris.length; i ++ ){
-    var side1 = subtract(verts[tris[i][1]], verts[tris[i][0]]);
-    var side2 = subtract(verts[tris[i][2]], verts[tris[i][0]]);
-    var normal = vec4(normalize(cross(side1, side2)), 0);
-    norms.push(normal);
-  }
+    var norms = []
+    for (var i = 0; i < tris.length; i ++ ){
+      var side1 = subtract(verts[tris[i][1]], verts[tris[i][0]]);
+      var side2 = subtract(verts[tris[i][2]], verts[tris[i][0]]);
+      var normal = vec4(normalize(cross(side1, side2)), 0);
+      norms.push(normal);
+    }
 
   tris = flatten(tris);
 
