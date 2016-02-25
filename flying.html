@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+<title>5-Scene</title>
+
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+
+attribute vec4 vPosition; // A 4-vector giving input vertex's location.
+attribute vec4 normal; // A 4-vector giving the input vertex's normal vector
+varying vec4 color; // A 4-vector given to the rasterizer
+                    // to yield fragment color
+
+
+void
+main()
+{
+  // apply instance transformation and then world-to-canonical view transform
+  gl_Position = vPosition ;
+  color = vPosition;
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+precision mediump float; // set precision of floating-point variables to mediump
+                         // to guarantee that our function will run on all
+                         // versions of WebGL
+
+varying vec4 color;
+
+void
+main()
+{
+    gl_FragColor = color;
+}
+</script>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="flying.js"></script>
+</head>
+
+<body>
+<canvas id="gl-canvas" width="512" height="512">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+</body>
+</html>
