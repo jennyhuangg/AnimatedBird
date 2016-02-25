@@ -1,5 +1,8 @@
 "use strict";
 
+var baseColor = vec4( 1, 0.7, 0.4, 1.0 );
+var vLook = vec4(1, 0.5, -0.2, 0);
+
 window.onload = function init()
 {
   // Create the WebGL context.
@@ -37,6 +40,12 @@ window.onload = function init()
     gl.vertexAttribPointer( normalLoc , 4, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( normalLoc );
 
+    var baseColorLoc = gl.getUniformLocation(program, "baseColor");
+    gl.uniform4fv(baseColorLoc, flatten(baseColor));
+
+    var vLookLoc = gl.getUniformLocation(program, "vLook");
+    gl.uniform4fv(vLookLoc, flatten(vLook));
+
     // Load vertex data into GPU
     var bufferId = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, bufferId );
@@ -54,8 +63,6 @@ window.onload = function init()
 
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.drawElements( gl.TRIANGLES, tris.length, gl.UNSIGNED_SHORT, 0);
-
-
 };
 
 function birdFaceToVertProperties(vertices, indices, norms1)
@@ -84,22 +91,22 @@ function bird() {
     vec4(0, 0, 0.5, 1),
     vec4(0, -0.5, 0, 1),
     vec4(0, 0.5, 0, 1),
-    vec4(3, 0, 0, 1),
+    vec4(3, 0, 0, 1)
   ];
 
   var tris = [
-    [0, 1, 2],
-    [0, 3, 1],
-    [1, 3, 2],
-    [0, 2, 3]];
+    0, 1, 2,
+    0, 3, 1,
+    1, 3, 2,
+    0, 2, 3];
 
-    var norms = []
-    for (var i = 0; i < tris.length; i ++ ){
-      var side1 = subtract(verts[tris[i][1]], verts[tris[i][0]]);
-      var side2 = subtract(verts[tris[i][2]], verts[tris[i][0]]);
-      var normal = vec4(normalize(cross(side1, side2)), 0);
-      norms.push(normal);
-    }
+  var norms = []
+  for ( var i = 0; i < tris.length; i +=3) {
+    var vec1 = subtract(verts[tris[i+1]],verts[tris[i]]);
+    var vec2 = subtract(verts[tris[i+2]],verts[tris[i]]);
+    var norm = normalize(vec4(cross(vec1, vec2), 0));
+    norms.push(norm);
+  }
 
   tris = flatten(tris);
 
