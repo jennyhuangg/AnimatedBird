@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-<title>5-Scene</title>
+<title>Flying</title>
 
 
 <script id="vertex-shader" type="x-shader/x-vertex">
@@ -26,6 +26,9 @@ main()
   // Transform and normalize the normal vector. Shades each triangle's color
   // based on the cosine of the angle between it and the look vector.
   fColor = baseColor*dot(normalize(vLook), normalize(normal));
+  // if (dot(normalize(vLook), normalize(normal)) < 0.){
+  //   fColor = -fColor;
+  // }
   // set A to 1.0.
   fColor.w = 1.0;
 }

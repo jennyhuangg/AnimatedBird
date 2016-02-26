@@ -1,7 +1,7 @@
 "use strict";
 
-var baseColor = vec4( 1, 0.7, 0.4, 1.0 );
-var vLook = vec4(1, 0.5, -0.2, 0);
+var baseColor = vec4( 0.2, 0.8, 1.0, 1.0 ); //orange
+var vLook = normalize(vec4(1, 0.5, 0.2, 0));
 
 window.onload = function init()
 {
@@ -24,8 +24,10 @@ window.onload = function init()
     gl.viewport( 0, 0, canvas.width, canvas.height );
     // Set background to white when cleared
     gl.clearColor( 1.0, 1.0, 1.0, 1.0 );
+    gl.clearDepth(-1.0);
     // enable hidden-surface removal
     gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.GEQUAL);
 
     //  Load shaders and initialize attribute buffers
     var program = initShaders( gl, "vertex-shader", "fragment-shader" );
@@ -42,7 +44,6 @@ window.onload = function init()
 
     var baseColorLoc = gl.getUniformLocation(program, "baseColor");
     gl.uniform4fv(baseColorLoc, flatten(baseColor));
-
     var vLookLoc = gl.getUniformLocation(program, "vLook");
     gl.uniform4fv(vLookLoc, flatten(vLook));
 
@@ -88,10 +89,10 @@ function birdFaceToVertProperties(vertices, indices, norms1)
 
 function bird() {
   var verts = [
-    vec4(0, 0, 0.5, 1),
-    vec4(0, -0.5, 0, 1),
-    vec4(0, 0.5, 0, 1),
-    vec4(3, 0, 0, 1)
+    vec4(0, 0, 0.1, 1),
+    vec4(0, -0.1, 0, 1),
+    vec4(0, 0.1, 0, 1),
+    vec4(-1, 0, 0, 1)
   ];
 
   var tris = [
@@ -107,8 +108,6 @@ function bird() {
     var norm = normalize(vec4(cross(vec1, vec2), 0));
     norms.push(norm);
   }
-
-  tris = flatten(tris);
 
   return {
     verts: verts,
