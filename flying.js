@@ -12,7 +12,7 @@ var gl;
 
 var mode = 1;
 
-
+var instanceXformLoc;
 window.onload = function init()
 {
   // Create the WebGL context.
@@ -73,6 +73,9 @@ window.onload = function init()
     gl.enableVertexAttribArray( vPosition );
 
     thetaLoc = gl.getUniformLocation(program, "theta");
+
+    instanceXformLoc = gl.getUniformLocation(program, "instanceXform");
+
     render();
 };
 
@@ -126,22 +129,36 @@ function bird() {
   };
 }
 
+var baseXform;
 function render(){
   gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   if (mode == 1){
     theta[axis] += 2.0;
-    if (theta[axis] >= 30){
+    if (theta[axis] >= 45){
       mode = 0;
     }
   }
   if (mode == 0){
     theta[axis] -= 2.0;
-    if (theta[axis] <= -30){
+    if (theta[axis] <= -45){
       mode = 1;
     }
   }
   gl.uniform3fv(thetaLoc, theta);
 
+  baseXform = mat4(1, 0, 0, 0,
+                  0, 1, 0, 0,
+                  0, 0, 1, 0,
+                  0, 0, 0, 1);
+  gl.uniformMatrix4fv(instanceXformLoc, false, flatten(baseXform));
   gl.drawElements( gl.TRIANGLES, 12, gl.UNSIGNED_SHORT, 0);
+
+  baseXform = mat4(-1, 0, 0, 0,
+                  0, 1, 0, 0,
+                  0, 0, 1, 0,
+                  0, 0, 0, 1);
+  gl.uniformMatrix4fv(instanceXformLoc, false, flatten(baseXform));
+  gl.drawElements( gl.TRIANGLES, 12, gl.UNSIGNED_SHORT, 0);
+
   requestAnimFrame( render );
 }
