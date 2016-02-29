@@ -4,7 +4,8 @@ var baseColor = vec4( 0.2, 0.8, 1.0, 1.0 ); //orange
 var vLook = normalize(vec4(1, 0.5, 0.2, 0));
 
 var axis = 1;
-var theta = [ 0, 0, 0 ];
+var theta1 = [-30, 0, 0 ];
+var theta2 = [-30, 0, 0];
 
 var thetaLoc;
 
@@ -102,17 +103,47 @@ function birdFaceToVertProperties(vertices, indices, norms1)
 
 function bird() {
   var verts = [
-    vec4(0, 0, 0.1, 1),
-    vec4(0, -0.1, 0, 1),
-    vec4(0, 0.1, 0, 1),
-    vec4(-1, 0, 0, 1)
+    vec4(0, 0, 0),
+    vec4(-0.25, 0.1, 0.20),
+    vec4(-0.25, 0.1, 0.21),
+    vec4(-0.25, -0.1, 0.21),
+    vec4(-0.25, -0.1, 0.20),
+    vec4(-0.5, 0.1, 0.30),
+    vec4(-0.5, 0.1, 0.31),
+    vec4(-0.5, -0.1, 0.31),
+    vec4(-0.5, -0.1, 0.30),
+    vec4(-0.75, 0.1, 0.20),
+    vec4(-0.75, 0.1, 0.21),
+    vec4(-0.75, -0.1, 0.21),
+    vec4(-0.75, -0.1, 0.20),
+    vec4(-1., 0., 0.)
   ];
 
   var tris = [
-    0, 1, 2,
-    0, 3, 1,
-    1, 3, 2,
-    0, 2, 3];
+    0, 2, 1,
+    0, 3, 2,
+    0, 4, 3,
+    0, 1, 4,
+    2, 3, 7,
+    3, 4, 8,
+    4, 1, 8,
+    1, 2, 6,
+    2, 7, 6,
+    3, 8, 7,
+    4, 5, 8,
+    1, 6, 5,
+    6, 7, 11,
+    7, 8, 12,
+    8, 5, 12,
+    5, 6, 10,
+    6, 11, 10,
+    7, 12, 11,
+    8, 9, 12,
+    5, 10, 9,
+    13, 10, 11,
+    13, 9, 10,
+    13, 12, 9,
+    13, 11, 12];
 
   var norms = []
   for ( var i = 0; i < tris.length; i +=3) {
@@ -132,33 +163,43 @@ function bird() {
 var baseXform;
 function render(){
   gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
   if (mode == 1){
-    theta[axis] += 2.0;
-    if (theta[axis] >= 45){
-      mode = 0;
-    }
+    theta1[axis] += 2.0;
   }
-  if (mode == 0){
-    theta[axis] -= 2.0;
-    if (theta[axis] <= -45){
-      mode = 1;
-    }
+  if (mode == -1){
+    theta1[axis] -= 2.0;
   }
-  gl.uniform3fv(thetaLoc, theta);
+  gl.uniform3fv(thetaLoc, theta1);
 
   baseXform = mat4(1, 0, 0, 0,
                   0, 1, 0, 0,
                   0, 0, 1, 0,
                   0, 0, 0, 1);
+
   gl.uniformMatrix4fv(instanceXformLoc, false, flatten(baseXform));
-  gl.drawElements( gl.TRIANGLES, 12, gl.UNSIGNED_SHORT, 0);
+  gl.drawElements( gl.TRIANGLES, 72, gl.UNSIGNED_SHORT, 0);
+
+  if (mode == 1){
+    theta2[axis] -= 2.0;
+  }
+  if (mode == -1){
+    theta2[axis] += 2.0;
+  }
+  gl.uniform3fv(thetaLoc, theta2);
+
+
+  if (theta2[axis] <= -35 || theta2[axis] >= 35){
+    mode = -1*mode;
+  }
 
   baseXform = mat4(-1, 0, 0, 0,
                   0, 1, 0, 0,
                   0, 0, 1, 0,
                   0, 0, 0, 1);
+
   gl.uniformMatrix4fv(instanceXformLoc, false, flatten(baseXform));
-  gl.drawElements( gl.TRIANGLES, 12, gl.UNSIGNED_SHORT, 0);
+  gl.drawElements( gl.TRIANGLES, 72, gl.UNSIGNED_SHORT, 0);
 
   requestAnimFrame( render );
 }
