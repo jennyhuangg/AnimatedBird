@@ -3,12 +3,20 @@
 var baseColor = vec4( 0.2, 0.8, 1.0, 1.0 ); //orange
 var vLook = normalize(vec4(1, 0.5, 0.2, 0));
 
+var axis = 0;
+var theta = [ 0, 0, 0 ];
+
+var thetaLoc;
+
+var gl;
+
+
 window.onload = function init()
 {
   // Create the WebGL context.
   // This allows us to use WebGL functions such as bindBuffer.
     var canvas = document.getElementById( "gl-canvas" );
-    var gl = WebGLUtils.setupWebGL( canvas );
+    gl = WebGLUtils.setupWebGL( canvas );
     if ( !gl ) { alert( "WebGL isn't available" ); }
 
     // Create bird vertices array, triangle indices, and normals
@@ -62,8 +70,8 @@ window.onload = function init()
     gl.vertexAttribPointer( vPosition, 4, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vPosition );
 
-    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.drawElements( gl.TRIANGLES, tris.length, gl.UNSIGNED_SHORT, 0);
+    thetaLoc = gl.getUniformLocation(program, "theta");
+    render();
 };
 
 function birdFaceToVertProperties(vertices, indices, norms1)
@@ -114,4 +122,13 @@ function bird() {
     tris: tris,
     norms: norms
   };
+}
+
+function render(){
+  gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  theta[axis] += 2.0;
+  gl.uniform3fv(thetaLoc, theta);
+
+  gl.drawElements( gl.TRIANGLES, 12, gl.UNSIGNED_SHORT, 0);
+  requestAnimFrame( render );
 }
