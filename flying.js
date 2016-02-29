@@ -3,12 +3,14 @@
 var baseColor = vec4( 0.2, 0.8, 1.0, 1.0 ); //orange
 var vLook = normalize(vec4(1, 0.5, 0.2, 0));
 
-var axis = 0;
+var axis = 1;
 var theta = [ 0, 0, 0 ];
 
 var thetaLoc;
 
 var gl;
+
+var mode = 1;
 
 
 window.onload = function init()
@@ -126,7 +128,18 @@ function bird() {
 
 function render(){
   gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  theta[axis] += 2.0;
+  if (mode == 1){
+    theta[axis] += 2.0;
+    if (theta[axis] >= 30){
+      mode = 0;
+    }
+  }
+  if (mode == 0){
+    theta[axis] -= 2.0;
+    if (theta[axis] <= -30){
+      mode = 1;
+    }
+  }
   gl.uniform3fv(thetaLoc, theta);
 
   gl.drawElements( gl.TRIANGLES, 12, gl.UNSIGNED_SHORT, 0);

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+<title>1-Letter</title>
+
+<!-- Assign the identifier "vertex-shader" to the vertex shader source -->
+<script id="vertex-shader" type="x-shader/x-vertex">
+// A simple pass-through vertex shader
+
+attribute vec4 vPosition; // A 4-vector giving input vertex's location.
+attribute vec2 aTextureCoord;
+
+varying vec2 vTextureCoord;
+
+void
+main()
+{
+    // gl_Position is the built-in state variable in this shader that
+    // passes position information to the rasterizer.
+    // Does not need to be declared because it is built into WebGL
+    gl_Position = vPosition;
+    vTextureCoord = aTextureCoord;
+}
+</script>
+
+<!-- Assign the identifier "fragment-shader" to the fragment shader source -->
+<script id="fragment-shader" type="x-shader/x-fragment">
+precision mediump float; // set precision of floating-point variables to mediump
+                         // to guarantee that our function will run on all
+                         // versions of WebGL
+varying highp vec2 vTextureCoord;
+
+uniform sampler2D uSampler;
+void
+main()
+{
+    // set the color of the triangle to green by
+    // modifying the built-in variable gl_FragColor
+    gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+    // gl_FragColor = vec4( 0.0, 1.0, 0.0, 1.0 );
+}
+</script>
+
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="1-letter.js"></script>
+</head>
+
+<body>
+<canvas id="gl-canvas" width="512" height="512">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+</body>
+</html>
