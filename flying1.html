@@ -50,7 +50,7 @@ main()
       0.0, 1.0,  0.0, 0.0,
       s.y, 0.0,  c.y, 0.0,
       0.0, 0.0,  0.0, 1.0 );
-      
+
   mat4 rz = mat4( c.z, s.z, 0.0, 0.0,
       -s.z,  c.z, 0.0, 0.0,
       0.0,  0.0, 1.0, 0.0,
@@ -81,13 +81,17 @@ precision mediump float; // set precision of floating-point variables to mediump
 
 varying float shade;
 varying  vec2 fTexCoord;
+
+// sample of texture image for input texture coordinates
 uniform sampler2D texture;
 
 void
 main()
 {
+    // Use texture to determine color of each fragment, then multiply
+    // but shading factor
     gl_FragColor = texture2D( texture, fTexCoord ) * shade ;
-    gl_FragColor.w = 1.;
+    gl_FragColor.w = 1.; // set alpha = 1
 }
 </script>
 
