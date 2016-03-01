@@ -1,4 +1,4 @@
-// Javascript rogram for HW8: Final Project
+// Javascript program for HW8: Final Project
 // COMP 630 W'16 - Computer Graphics
 // Phillips Academy
 // 2016-03-01
@@ -170,17 +170,24 @@ function render(){
   requestAnimFrame( render );
 }
 
+// sets the matrix that rotates the world relative to the camera for panning
 function setRotationMatrix( x,  y)
 {
   if (!(x == 0 && y == 0))
   {
-    var origin = vec4(0, 0, 0, 1); // look at point
-    var eye = vec4(0, 0, 1, 1); // eye
-    var vec1 = vec4(x, y, 0, 0);
-    var vec2 = subtract(origin, eye);
-    var perp = normalize(cross(vec2, vec1));
-    var angle = 2*length(vec1);
-    var rot = rotate(angle, perp);
+    // set axis around which to pan the camera
+    var vec1 = vec4(x, y, 0, 0); // vector determined by mouse
+    var vec2 = vec4(0, 0, -1, 0); // vector of camera loc
+    var panningAxis = normalize(cross(vec2, vec1));
+
+    // set an angle of rotation in frame proportional to
+    // distance from mouse to origin
+    var angle = 2 * length(vec1);
+
+    // get axis to rotate by
+    var rot = rotate(angle, panningAxis);
+
+    // combine new rotation with old rotations
     camRotationMatrix = mult(rot, camRotationMatrix);
   }
 }

@@ -39,7 +39,8 @@ main()
   vec3 c = cos( angles );
   vec3 s = sin( angles );
 
-  // Remember: thse matrices are column-major
+  // Rotation matrixes that animate the wings; rotation about y creates the
+  // flapping and rotation about x creates the initial upward tilt of the bird
   mat4 rx = mat4( 1.0,  0.0,  0.0, 0.0,
       0.0,  c.x,  s.x, 0.0,
       0.0, -s.x,  c.x, 0.0,
@@ -49,7 +50,7 @@ main()
       0.0, 1.0,  0.0, 0.0,
       s.y, 0.0,  c.y, 0.0,
       0.0, 0.0,  0.0, 1.0 );
-
+      
   mat4 rz = mat4( c.z, s.z, 0.0, 0.0,
       -s.z,  c.z, 0.0, 0.0,
       0.0,  0.0, 1.0, 0.0,
