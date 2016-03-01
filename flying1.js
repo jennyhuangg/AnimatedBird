@@ -227,19 +227,19 @@ window.onload = function init()
 
 function initTexture() {
   birdTexture = gl.createTexture();
-  var birdImage = new Image();
-  birdImage.onload = function() { handleTextureLoaded(birdImage, birdTexture); }
-  birdImage.src = "texture.png";
+  birdTexture.image = new Image();
+  birdTexture.image.onload = function() {
+    handleTextureLoaded(birdTexture);
+  }
+  birdTexture.image.src = "nehe.gif";
 }
 
-function handleTextureLoaded(image, texture) {
+function handleTextureLoaded(texture) {
   gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
-        gl.UNSIGNED_BYTE, image);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
   gl.bindTexture(gl.TEXTURE_2D, null);
 }
 
