@@ -144,7 +144,7 @@ window.onload = function init()
     // and heigh of viewport
     gl.viewport( 0, 0, canvas.width, canvas.height );
     // Set background to white when cleared
-    gl.clearColor( 0.4, 1.0, 1.0, 1.0 );
+    gl.clearColor( 0.3, 0.6, 1.0, 1.0 );
     gl.clearDepth(-1.0);
     // enable hidden-surface removal
     gl.enable(gl.DEPTH_TEST);
