@@ -65,21 +65,18 @@ var vertexColors = [
 ];
 window.onload = init;
 
-function configureTexture(image) {
+function configureTexture() {
     var texture = gl.createTexture();
-
 
     var myTexels = new Image();
     myTexels.src = "bird1.jpg";
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB,
-                  gl.UNSIGNED_BYTE, myTexels);
 
     gl.activeTexture( gl.TEXTURE0 );
     gl.bindTexture( gl.TEXTURE_2D, texture );
+
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, texSize, texSize, 0,
-        gl.RGBA, gl.UNSIGNED_BYTE, image);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB,
+                  gl.UNSIGNED_BYTE, myTexels);
     gl.generateMipmap( gl.TEXTURE_2D );
     gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER,
         gl.NEAREST_MIPMAP_LINEAR );
