@@ -1,219 +1,197 @@
+// Javascript rogram for HW8: Final Project
+// COMP 630 W'16 - Computer Graphics
+// Phillips Academy
+// 2016-03-01
+//
+// By Amy Chou and Jenny Huang
+
 "use strict";
-
-// var baseColor = vec4( 0.2, 0.8, 1.0, 1.0 ); //orange
-var vLook = normalize(vec4(1, 0.5, 0.2, 0));
-
-// wing flapping variables
-var axis = 1;
-var theta1 = [-30, 0, 0 ];
-var theta2 = [-30, 0, 0];
-var mode = 1;
-var thetaLoc;
 
 var gl;
 
-var birdTexture;
+// Bird properties
+var verts;
+var tris;
+var norms;
+var texCoord = []; // coordinates cutting out texture for mapping to triangles
 
+// Direction to light source
+var vLight = normalize(vec4(1, 0.5, 0.2, 0));
+
+// Wing flapping variables
+var axis = 1; // axis the wing rotates around to flap
+var theta1 = [-30, 0, 0]; // angles between wing 1 and axis
+var theta2 = [-30, 0, 0]; // angles between wing 2 and axis
+var mode = 1; // 1 if wing is going up, -1 if wing is going down
+var wingDupliXform;
+
+// Camera variables
+var camRotationMatrix; // matrix an object rotates relative to camera
+var x = 0.; // x coord of user's mouse
+var y = 0.; // y coord of user's mouse
+
+// Shader location variables
+var thetaLoc;
 var instanceXformLoc;
-var rotationMatrixLoc;
-
-var origin = vec4(0, 0, 0, 1);
-var eye = vec4(0, 0, 1, 1);
-var up = vec4(0, 1, 0, 1);
-var rotationMatrix;
-
-var cam_x = 1.;
-var cam_y = 0.;
-
-var texCoord = [
-  // Front
-  0.0,  1.0,
-  1.0,  0.0,
-  1.0,  1.0,
-  // Front
-  0.0,  1.0,
-  1.0,  0.0,
-  1.0,  1.0,
-  // Front
-  0.0,  1.0,
-  1.0,  0.0,
-  1.0,  1.0,
-  // Front
-  0.0,  1.0,
-  1.0,  0.0,
-  1.0,  1.0,
-  // Front
-  0.0,  0.0,
-  1.0,  0.0,
-  1.0,  1.0,
-  // Front
-  0.0,  0.0,
-  1.0,  0.0,
-  1.0,  1.0,
-  // Front
-  0.0,  0.0,
-  1.0,  0.0,
-  1.0,  1.0,
-  // Front
-  0.0,  0.0,
-  1.0,  0.0,
-  1.0,  1.0,
-  // Front
-  0.0,  0.0,
-  1.0,  0.0,
-  1.0,  1.0,
-  // Front
-  0.0,  0.0,
-  1.0,  0.0,
-  1.0,  1.0,
-  // Front
-  0.0,  0.0,
-  1.0,  0.0,
-  1.0,  1.0,
-  // Front
-  0.0,  0.0,
-  1.0,  0.0,
-  1.0,  1.0,
-  // Front
-  0.0,  0.0,
-  1.0,  0.0,
-  1.0,  1.0,
-  // Front
-  0.0,  0.0,
-  1.0,  0.0,
-  1.0,  1.0,
-  // Front
-  0.0,  0.0,
-  1.0,  0.0,
-  1.0,  1.0,
-  // Front
-  0.0,  0.0,
-  1.0,  0.0,
-  1.0,  1.0,
-  // Front
-  0.0,  0.0,
-  1.0,  0.0,
-  1.0,  1.0,
-  // Front
-  0.0,  0.0,
-  1.0,  0.0,
-  1.0,  1.0,
-  // Front
-  0.0,  0.0,
-  1.0,  0.0,
-  1.0,  1.0,
-  // Front
-  0.0,  0.0,
-  1.0,  0.0,
-  1.0,  1.0,
-  // Front
-  0.0,  0.0,
-  1.0,  0.0,
-  1.0,  1.0,
-  // Front
-  0.0,  0.0,
-  1.0,  0.0,
-  1.0,  1.0,
-  // Front
-  0.0,  0.0,
-  1.0,  0.0,
-  1.0,  1.0,
-  // Front
-  0.0,  0.0,
-  1.0,  0.0,
-  1.0,  1.0
-];
+var camRotationMatrixLoc;
 
 window.onload = function init()
 {
   // Create the WebGL context.
-  // This allows us to use WebGL functions such as bindBuffer.
-    var canvas = document.getElementById( "gl-canvas" );
-    gl = WebGLUtils.setupWebGL( canvas );
-    if ( !gl ) { alert( "WebGL isn't available" ); }
+  var canvas = document.getElementById( "gl-canvas" );
+  gl = WebGLUtils.setupWebGL( canvas );
+  if ( !gl ) { alert( "WebGL isn't available" ); }
 
-    // Create bird vertices array, triangle indices, and normals
-    var shape = bird();
-    var ftv = birdFaceToVertProperties(shape.verts, shape.tris, shape.norms);
-    var verts = ftv.verts;
-    var tris = ftv.tris;
-    var norms = ftv.norms;
+  // Create bird vertices array, triangle indices, and normals
+  var shape = bird();
+  var ftv = birdFaceToVertProperties(shape.verts, shape.tris, shape.norms);
+  verts = ftv.verts;
+  tris = ftv.tris;
+  norms = ftv.norms;
+  setTexCoord(); // populate texCoord
 
-    //  Configure WebGL - (0, 0) specifies the lower left corner of the viewport
-    // rectangle, in pixels. canvas.width and canvas.height specifies the width
-    // and heigh of viewport
-    gl.viewport( 0, 0, canvas.width, canvas.height );
-    // Set background to white when cleared
-    gl.clearColor( 0.3, 0.6, 1.0, 1.0 );
-    gl.clearDepth(-1.0);
-    // enable hidden-surface removal
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.GEQUAL);
+  //  Configure WebGL - (0, 0) specifies the lower left corner of the viewport
+  // rectangle, in pixels. canvas.width and canvas.height specifies the width
+  // and heigh of viewport
+  gl.viewport( 0, 0, canvas.width, canvas.height );
+  gl.clearColor( 0.3, 0.6, 1.0, 1.0 ); // Sky blue background when cleared
+  gl.clearDepth(-1.0);
+  // enable hidden-surface removal
+  gl.enable(gl.DEPTH_TEST);
+  gl.depthFunc(gl.GEQUAL);
 
-    //  Load shaders and initialize attribute buffers
-    var program = initShaders( gl, "vertex-shader", "fragment-shader" );
-    gl.useProgram( program );
+  //  Load shaders and initialize attribute buffers
+  var program = initShaders( gl, "vertex-shader", "fragment-shader" );
+  gl.useProgram( program );
 
-    // Load normals data into the GPU
-    var normalBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, normalBuffer );
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(norms), gl.STATIC_DRAW );
-    // Link to the attribute "normal" in the shader
-    var normalLoc = gl.getAttribLocation( program, "normal" );
-    gl.vertexAttribPointer( normalLoc , 4, gl.FLOAT, false, 0, 0 );
-    gl.enableVertexAttribArray( normalLoc );
+  // Load normals data into the GPU
+  var normalBuffer = gl.createBuffer();
+  gl.bindBuffer( gl.ARRAY_BUFFER, normalBuffer );
+  gl.bufferData( gl.ARRAY_BUFFER, flatten(norms), gl.STATIC_DRAW );
+  // Link to the attribute "normal" in the shader
+  var normalLoc = gl.getAttribLocation( program, "normal" );
+  gl.vertexAttribPointer( normalLoc , 4, gl.FLOAT, false, 0, 0 );
+  gl.enableVertexAttribArray( normalLoc );
 
-    // var baseColorLoc = gl.getUniformLocation(program, "baseColor");
-    // gl.uniform4fv(baseColorLoc, flatten(baseColor));
-    var vLookLoc = gl.getUniformLocation(program, "vLook");
-    gl.uniform4fv(vLookLoc, flatten(vLook));
+  // Load vertex data into GPU
+  var vertBuffer = gl.createBuffer();
+  gl.bindBuffer( gl.ARRAY_BUFFER, vertBuffer );
+  gl.bufferData( gl.ARRAY_BUFFER,
+  new Float32Array(flatten(verts)), gl.STATIC_DRAW );
+  // Load triangle indices data into GPU
+  var trisBuffer = gl.createBuffer();
+  gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, trisBuffer );
+  gl.bufferData( gl.ELEMENT_ARRAY_BUFFER,
+  new Uint16Array(flatten(tris)), gl.STATIC_DRAW );
+  // Link to the attribute "vPosition" in the shader
+  var vPosition = gl.getAttribLocation( program, "vPosition" );
+  gl.vertexAttribPointer( vPosition, 4, gl.FLOAT, false, 0, 0 );
+  gl.enableVertexAttribArray( vPosition );
 
-    // Load vertex data into GPU
-    var bufferId = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, bufferId );
-    gl.bufferData( gl.ARRAY_BUFFER,
-      new Float32Array(flatten(verts)), gl.STATIC_DRAW );
+  // Load texture data into GPU
+  var textureBuffer = gl.createBuffer();
+  gl.bindBuffer( gl.ARRAY_BUFFER, textureBuffer);
+  gl.bufferData( gl.ARRAY_BUFFER, flatten(texCoord), gl.STATIC_DRAW );
+  // Link to the attribute "vTexCoord" in the shader
+  var vTexCoord = gl.getAttribLocation( program, "vTexCoord");
+  gl.vertexAttribPointer(vTexCoord, 2, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(vTexCoord);
+  configureTexture();
 
-    // Link to the attribute "vPosition" in the shader
-    var vPosition = gl.getAttribLocation( program, "vPosition" );
-    gl.vertexAttribPointer( vPosition, 4, gl.FLOAT, false, 0, 0 );
-    gl.enableVertexAttribArray( vPosition );
+  // Link to shader uniforms that change with animation
+  thetaLoc = gl.getUniformLocation(program, "theta");
+  instanceXformLoc = gl.getUniformLocation(program, "instanceXform");
+  camRotationMatrixLoc = gl.getUniformLocation(program, "cameraRotation");
+
+  // Link to shader uniforms that do not change with animation
+  // Bind to direction of light source
+  var vLightLoc = gl.getUniformLocation(program, "vLight");
+  gl.uniform4fv(vLightLoc, flatten(vLight));
+
+  // Add event listener to detect when mouse is moved on canvas
+  canvas.addEventListener("mousemove", function(event){
+    // Update x and y
+    x = 2*event.clientX/canvas.width-1;
+    y = 2*(canvas.height-event.clientY)/canvas.height-1;
+  } );
 
 
-    var tBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, tBuffer);
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(texCoord), gl.STATIC_DRAW );
-    var vTexCoord = gl.getAttribLocation( program, "vTexCoord");
-    gl.vertexAttribPointer(vTexCoord, 2, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(vTexCoord);
-
-    configureTexture();
-
-    // Load triangle indices data into GPU
-    var bufferId2 = gl.createBuffer();
-    gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, bufferId2 );
-    gl.bufferData( gl.ELEMENT_ARRAY_BUFFER,
-      new Uint16Array(flatten(tris)), gl.STATIC_DRAW );
-
-    thetaLoc = gl.getUniformLocation(program, "theta");
-
-    instanceXformLoc = gl.getUniformLocation(program, "instanceXform");
-    rotationMatrixLoc = gl.getUniformLocation(program, "cameraRotation");
-
-    rotationMatrix = mat4(1, 0, 0, 0,
+  // Initialize camera rotation matrix to identity
+  camRotationMatrix = mat4(1, 0, 0, 0,
                           0, 1, 0, 0,
                           0, 0, 1, 0,
                           0, 0, 0, 1);
 
-    canvas.addEventListener("mousemove", function(event){
-
-      cam_x = 2*event.clientX/canvas.width-1;
-      cam_y = 2*(canvas.height-event.clientY)/canvas.height-1;
-      setRotationMatrix( cam_x,  cam_y);
-    } );
-
-    render();
+  render();
 };
+
+function render(){
+  gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+  // Set camera panning; moves if x and y are updated
+  setRotationMatrix(x, y);
+  gl.uniformMatrix4fv(camRotationMatrixLoc, false, flatten(camRotationMatrix));
+
+  //---------- Render Wing 1 ----------------
+  // No transformation; vertices are as hardcoded
+  wingDupliXform = mat4(1, 0, 0, 0,
+                  0, 1, 0, 0,
+                  0, 0, 1, 0,
+                  0, 0, 0, 1);
+  gl.uniformMatrix4fv(instanceXformLoc, false, flatten(wingDupliXform));
+
+  // Set angles of wing rotation
+  if (mode == 1  ) { theta1[axis] += 2.0; } // CCW rotation if wing going up
+  if (mode == -1 ) { theta1[axis] -= 2.0; } // CW rotation if wing going down
+  gl.uniform3fv(thetaLoc, theta1);
+
+  gl.drawElements( gl.TRIANGLES, verts.length, gl.UNSIGNED_SHORT, 0);
+
+  //---------- Render Wing 2 ----------------
+  // Invert vertices to other side of x axis
+  wingDupliXform = mat4(-1, 0, 0, 0,
+                  0, 1, 0, 0,
+                  0, 0, 1, 0,
+                  0, 0, 0, 1);
+  gl.uniformMatrix4fv(instanceXformLoc, false, flatten(wingDupliXform));
+
+  // Set angles of wing rotation
+  if (mode == 1  ) { theta2[axis] -= 2.0; } // CW rotation if wing going up
+  if (mode == -1 ) { theta2[axis] += 2.0; } // CCW rotation if wing going down
+  gl.uniform3fv(thetaLoc, theta2);
+
+  gl.drawElements( gl.TRIANGLES, verts.length, gl.UNSIGNED_SHORT, 0);
+
+
+  // Update whether wings are going up or down
+  if (theta2[axis] <= -35 || theta2[axis] >= 35){
+    mode = -1*mode;
+  }
+  requestAnimFrame( render );
+}
+
+function setRotationMatrix( x,  y)
+{
+  if (!(x == 0 && y == 0))
+  {
+    var origin = vec4(0, 0, 0, 1); // look at point
+    var eye = vec4(0, 0, 1, 1); // eye
+    var vec1 = vec4(x, y, 0, 0);
+    var vec2 = subtract(origin, eye);
+    var perp = normalize(cross(vec2, vec1));
+    var angle = 2*length(vec1);
+    var rot = rotate(angle, perp);
+    camRotationMatrix = mult(rot, camRotationMatrix);
+  }
+}
+
+function setTexCoord(){
+  for (var i = 0; i < tris.length; i ++){
+    texCoord.push(0.0, 1.0);
+    texCoord.push(1.0, 0.0);
+    texCoord.push(1.0, 1.0);
+  }
+}
 
 function configureTexture() {
     var texture = gl.createTexture();
@@ -311,64 +289,4 @@ function bird() {
     tris: tris,
     norms: norms
   };
-}
-
-var baseXform;
-function render(){
-  gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-  setRotationMatrix(cam_x, cam_y);
-  gl.uniformMatrix4fv(rotationMatrixLoc, false, flatten(rotationMatrix));
-
-  if (mode == 1){
-    theta1[axis] += 2.0;
-  }
-  if (mode == -1){
-    theta1[axis] -= 2.0;
-  }
-  gl.uniform3fv(thetaLoc, theta1);
-
-  baseXform = mat4(1, 0, 0, 0,
-                  0, 1, 0, 0,
-                  0, 0, 1, 0,
-                  0, 0, 0, 1);
-
-  gl.uniformMatrix4fv(instanceXformLoc, false, flatten(baseXform));
-  gl.drawElements( gl.TRIANGLES, 72, gl.UNSIGNED_SHORT, 0);
-
-  if (mode == 1){
-    theta2[axis] -= 2.0;
-  }
-  if (mode == -1){
-    theta2[axis] += 2.0;
-  }
-  gl.uniform3fv(thetaLoc, theta2);
-
-
-  if (theta2[axis] <= -35 || theta2[axis] >= 35){
-    mode = -1*mode;
-  }
-
-  baseXform = mat4(-1, 0, 0, 0,
-                  0, 1, 0, 0,
-                  0, 0, 1, 0,
-                  0, 0, 0, 1);
-
-  gl.uniformMatrix4fv(instanceXformLoc, false, flatten(baseXform));
-  gl.drawElements( gl.TRIANGLES, 72, gl.UNSIGNED_SHORT, 0);
-
-  requestAnimFrame( render );
-}
-
-function setRotationMatrix( x,  y)
-{
-  if (!(x == 0 || y == 0))
-  {
-    var vec1 = vec4(x, y, 0, 0);
-    var vec2 = subtract(origin, eye);
-    var perp = normalize(cross(vec2, vec1));
-    var angle = 2*length(vec1);
-    var rot = rotate(angle, perp);
-    rotationMatrix = mult(rot, rotationMatrix);
-  }
 }

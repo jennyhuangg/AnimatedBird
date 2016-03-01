@@ -18,7 +18,7 @@ varying float shade; // A 4-vector given to the rasterizer
 // // Base color for the shape.
 // uniform  vec4 baseColor;
 // Look vector.
-uniform  vec4 vLook;
+uniform  vec4 vLight;
 uniform vec3 theta;
 uniform mat4 instanceXform;
 uniform mat4 cameraRotation;
@@ -51,9 +51,9 @@ main()
 
   // Transform and normalize the normal vector. Shades each triangle's color
   // based on the cosine of the angle between it and the look vector.
-  shade = dot(normalize(vLook), normalize(rz * ry * rx *
+  shade = dot(normalize(vLight), normalize(rz * ry * rx *
     instanceXform * normal));
-  if (dot(normalize(vLook), normalize(normal)) < 0.){
+  if (dot(normalize(vLight), normalize(normal)) < 0.){
     shade = -shade;
   }
   // set A to 1.0.
