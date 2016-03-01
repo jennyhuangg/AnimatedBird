@@ -51,12 +51,8 @@ main()
 
   // Transform and normalize the normal vector. Shades each triangle's color
   // based on the cosine of the angle between it and the look vector.
-<<<<<<< HEAD
-  fColor = baseColor*dot(normalize(vLook), normalize(rz * ry * rx * normal));
-=======
   fColor = baseColor*dot(normalize(vLook), normalize(rz * ry * rx *
     instanceXform * normal));
->>>>>>> f853af7ee1992ad448ba83133d5b0941ea304579
   // if (dot(normalize(vLook), normalize(normal)) < 0.){
   //   fColor = -fColor;
   // }
