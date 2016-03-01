@@ -185,6 +185,9 @@ function setRotationMatrix( x,  y)
   }
 }
 
+
+// Sets the texture coordinates so that each triangle's vertices corresponds
+// to a triangle made from coordinated (0,1), (1,0), and (1,1) of the image.
 function setTexCoord(){
   for (var i = 0; i < tris.length; i ++){
     texCoord.push(0.0, 1.0);
@@ -193,25 +196,42 @@ function setTexCoord(){
   }
 }
 
+// Loads the texture from the image file and sets it up. Found
+// in the book chapter 7.5.
 function configureTexture() {
+
+    // Creates a GL texture object.
     var texture = gl.createTexture();
 
+    // Creates an Image object and loads into it the file with the texture.
     var myTexels = new Image();
     myTexels.src = "texture.png";
 
+    // Specifies active texture to the default value.
     gl.activeTexture( gl.TEXTURE0 );
+    // Specifies that this texture is the current texture we want to operate on.
     gl.bindTexture( gl.TEXTURE_2D, texture );
-
+    // Flips the image from top to bottom due to the different coordinate
+    // systems used by image and our application.
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    // Specifies the 2D texture.
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB,
                   gl.UNSIGNED_BYTE, myTexels);
+    // Adds mip mapping. Creates texture arrays at appropriate rreduced sizes.
     gl.generateMipmap( gl.TEXTURE_2D );
+    // Invoke mip maps.
     gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER,
         gl.NEAREST_MIPMAP_LINEAR );
     gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST );
 }
 
-function birdFaceToVertProperties(vertices, indices, norms1)
+// Creates duplicate vertices to attach information to the vertices instead of
+// faces. Takes as input the three arrays (vertices, indices, and
+// normals) and return an object with new arrays: a vertex array with
+// each vertex repeated for each face it is part of, a triangle array that
+// uses indices in the new vertex array, and a new normals array that
+// has a normal vector for each duplicate vertex.
+function birdFaceToVertProperties(vertices, indices, normals)
 {
     var verts = [];
     var tris = [];
@@ -221,8 +241,8 @@ function birdFaceToVertProperties(vertices, indices, norms1)
       verts.push(vertices[indices[i]]);
       tris.push(i);
     }
-    for ( var i = 0; i < norms1.length; ++i) {
-      norms.push(norms1[i], norms1[i], norms1[i]);
+    for ( var i = 0; i < normals.length; ++i) {
+      norms.push(normals[i], normals[i], normals[i]);
     }
 
     return {
@@ -232,6 +252,9 @@ function birdFaceToVertProperties(vertices, indices, norms1)
     };
 }
 
+// Produces three arrays with no redundant information: one for the bird's
+// vertex positions, one for the triangle indices, and one for the normals.
+// (one normal vector per triangle).
 function bird() {
   var verts = [
     vec4(0, 0, 0),
@@ -276,7 +299,7 @@ function bird() {
     13, 12, 9,
     13, 11, 12];
 
-  var norms = []
+  var norms = [];
   for ( var i = 0; i < tris.length; i +=3) {
     var vec1 = subtract(verts[tris[i+1]],verts[tris[i]]);
     var vec2 = subtract(verts[tris[i+2]],verts[tris[i]]);
