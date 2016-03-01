@@ -9,9 +9,20 @@
 // A simple pass-through vertex shader
 
 attribute vec4 vPosition; // A 4-vector giving input vertex's location.
-attribute vec2 aTextureCoord;
+attribute vec4 normal; // A 4-vector giving the input vertex's normal vector
+attribute vec2 vTexCoord;
 
-varying vec2 vTextureCoord;
+varying vec2 fTexCoord;
+varying float shade; // A 4-vector given to the rasterizer
+                    // to yield fragment color.
+
+// // Base color for the shape.
+// uniform  vec4 baseColor;
+// Look vector.
+uniform  vec4 vLook;
+uniform vec3 theta;
+uniform mat4 instanceXform;
+uniform mat4 cameraRotation;
 
 void
 main()
@@ -20,25 +31,23 @@ main()
     // passes position information to the rasterizer.
     // Does not need to be declared because it is built into WebGL
     gl_Position = vPosition;
-    vTextureCoord = aTextureCoord;
+    fTexCoord = vTexCoord;
 }
 </script>
 
 <!-- Assign the identifier "fragment-shader" to the fragment shader source -->
 <script id="fragment-shader" type="x-shader/x-fragment">
-precision mediump float; // set precision of floating-point variables to mediump
-                         // to guarantee that our function will run on all
-                         // versions of WebGL
-varying highp vec2 vTextureCoord;
+precision mediump float;
 
-uniform sampler2D uSampler;
+varying vec4 fColor;
+varying  vec2 fTexCoord;
+
+uniform sampler2D texture;
+
 void
 main()
 {
-    // set the color of the triangle to green by
-    // modifying the built-in variable gl_FragColor
-    gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
-    // gl_FragColor = vec4( 0.0, 1.0, 0.0, 1.0 );
+    gl_FragColor = texture2D( texture, fTexCoord );
 }
 </script>
 

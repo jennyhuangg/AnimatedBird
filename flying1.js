@@ -25,7 +25,7 @@ var rotationMatrix;
 var cam_x = 1.;
 var cam_y = 0.;
 
-var textureCoordinates = [
+var texCoord = [
   // Front
   0.0,  1.0,
   1.0,  0.0,
@@ -179,25 +179,15 @@ window.onload = function init()
     gl.vertexAttribPointer( vPosition, 4, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vPosition );
 
-    initTexture();
 
-    var textureCoordAttribute = gl.getAttribLocation(program, "vTexCoord");
-    gl.enableVertexAttribArray(textureCoordAttribute);
+    var tBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, tBuffer);
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(texCoord), gl.STATIC_DRAW );
+    var vTexCoord = gl.getAttribLocation( program, "vTexCoord");
+    gl.vertexAttribPointer(vTexCoord, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vTexCoord);
 
-    // Map the texture onto the cube's faces.
-    var cubeVerticesTextureCoordBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVerticesTextureCoordBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(flatten(textureCoordinates)),
-                gl.STATIC_DRAW);
-
-    // Set the texture coordinates attribute for the vertices.
-    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVerticesTextureCoordBuffer);
-    gl.vertexAttribPointer(textureCoordAttribute, 2, gl.FLOAT, false, 0, 0);
-
-    // Specify the texture to map onto the faces.
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, birdTexture);
-    gl.uniform1i(gl.getUniformLocation(program, "texture"), 0);
+    configureTexture();
 
     // Load triangle indices data into GPU
     var bufferId2 = gl.createBuffer();
@@ -225,22 +215,22 @@ window.onload = function init()
     render();
 };
 
-function initTexture() {
-  birdTexture = gl.createTexture();
-  var birdImage = new Image();
-  birdImage.onload = function() { handleTextureLoaded(birdImage, birdTexture); }
-  birdImage.src = "texture.png";
-}
+function configureTexture() {
+    var texture = gl.createTexture();
 
-function handleTextureLoaded(image, texture) {
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
-        gl.UNSIGNED_BYTE, image);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  gl.bindTexture(gl.TEXTURE_2D, null);
+    var myTexels = new Image();
+    myTexels.src = "texture.png";
+
+    gl.activeTexture( gl.TEXTURE0 );
+    gl.bindTexture( gl.TEXTURE_2D, texture );
+
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB,
+                  gl.UNSIGNED_BYTE, myTexels);
+    gl.generateMipmap( gl.TEXTURE_2D );
+    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER,
+        gl.NEAREST_MIPMAP_LINEAR );
+    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST );
 }
 
 function birdFaceToVertProperties(vertices, indices, norms1)
