@@ -3,17 +3,27 @@
 var baseColor = vec4( 0.2, 0.8, 1.0, 1.0 ); //orange
 var vLook = normalize(vec4(1, 0.5, 0.2, 0));
 
+// wing flapping variables
 var axis = 1;
-var theta1 = [-30, 0, 0 ];
+var theta1 = [-30, 0, 0];
 var theta2 = [-30, 0, 0];
-
+var mode = 1;
 var thetaLoc;
 
 var gl;
 
-var mode = 1;
 
 var instanceXformLoc;
+var rotationMatrixLoc;
+
+var origin = vec4(0, 0, 0, 1);
+var eye = vec4(0, 0, 1, 1);
+var up = vec4(0, 1, 0, 1);
+var rotationMatrix;
+
+
+var cam_x = 1.;
+var cam_y = 0.;
 window.onload = function init()
 {
   // Create the WebGL context.
@@ -76,6 +86,19 @@ window.onload = function init()
     thetaLoc = gl.getUniformLocation(program, "theta");
 
     instanceXformLoc = gl.getUniformLocation(program, "instanceXform");
+    rotationMatrixLoc = gl.getUniformLocation(program, "cameraRotation");
+
+    rotationMatrix = mat4(1, 0, 0, 0,
+                          0, 1, 0, 0,
+                          0, 0, 1, 0,
+                          0, 0, 0, 1);
+
+    canvas.addEventListener("mousemove", function(event){
+
+      cam_x = 2*event.clientX/canvas.width-1;
+      cam_y = 2*(canvas.height-event.clientY)/canvas.height-1;
+      setRotationMatrix( cam_x,  cam_y);
+    } );
 
     render();
 };
@@ -126,7 +149,7 @@ function bird() {
     0, 1, 4,
     2, 3, 7,
     3, 4, 8,
-    4, 1, 8,
+    4, 1, 5,
     1, 2, 6,
     2, 7, 6,
     3, 8, 7,
@@ -134,7 +157,7 @@ function bird() {
     1, 6, 5,
     6, 7, 11,
     7, 8, 12,
-    8, 5, 12,
+    8, 5, 9,
     5, 6, 10,
     6, 11, 10,
     7, 12, 11,
@@ -163,6 +186,9 @@ function bird() {
 var baseXform;
 function render(){
   gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+  setRotationMatrix(cam_x, cam_y);
+  gl.uniformMatrix4fv(rotationMatrixLoc, false, flatten(rotationMatrix));
 
   if (mode == 1){
     theta1[axis] += 2.0;
@@ -201,5 +227,19 @@ function render(){
   gl.uniformMatrix4fv(instanceXformLoc, false, flatten(baseXform));
   gl.drawElements( gl.TRIANGLES, 72, gl.UNSIGNED_SHORT, 0);
 
+
   requestAnimFrame( render );
+}
+
+function setRotationMatrix( x,  y)
+{
+  if (!(x == 0 || y == 0))
+  {
+    var vec1 = vec4(x, y, 0, 0);
+    var vec2 = subtract(origin, eye);
+    var perp = normalize(cross(vec2, vec1));
+    var angle = 2*length(vec1);
+    var rot = rotate(angle, perp);
+    rotationMatrix = mult(rot, rotationMatrix);
+  }
 }
