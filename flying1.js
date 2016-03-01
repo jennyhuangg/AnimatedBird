@@ -3,34 +3,43 @@
 // var baseColor = vec4( 0.2, 0.8, 1.0, 1.0 ); //orange
 var vLook = normalize(vec4(1, 0.5, 0.2, 0));
 
+// wing flapping variables
 var axis = 1;
 var theta1 = [-30, 0, 0 ];
 var theta2 = [-30, 0, 0];
-
+var mode = 1;
 var thetaLoc;
 
 var gl;
 
-var mode = 1;
+var birdTexture;
 
 var instanceXformLoc;
-var birdTexture;
+var rotationMatrixLoc;
+
+var origin = vec4(0, 0, 0, 1);
+var eye = vec4(0, 0, 1, 1);
+var up = vec4(0, 1, 0, 1);
+var rotationMatrix;
+
+var cam_x = 1.;
+var cam_y = 0.;
 
 var textureCoordinates = [
   // Front
-  0.0,  0.0,
+  0.0,  1.0,
   1.0,  0.0,
   1.0,  1.0,
   // Front
-  0.0,  0.0,
+  0.0,  1.0,
   1.0,  0.0,
   1.0,  1.0,
   // Front
-  0.0,  0.0,
+  0.0,  1.0,
   1.0,  0.0,
   1.0,  1.0,
   // Front
-  0.0,  0.0,
+  0.0,  1.0,
   1.0,  0.0,
   1.0,  1.0,
   // Front
@@ -199,6 +208,19 @@ window.onload = function init()
     thetaLoc = gl.getUniformLocation(program, "theta");
 
     instanceXformLoc = gl.getUniformLocation(program, "instanceXform");
+    rotationMatrixLoc = gl.getUniformLocation(program, "cameraRotation");
+
+    rotationMatrix = mat4(1, 0, 0, 0,
+                          0, 1, 0, 0,
+                          0, 0, 1, 0,
+                          0, 0, 0, 1);
+
+    canvas.addEventListener("mousemove", function(event){
+
+      cam_x = 2*event.clientX/canvas.width-1;
+      cam_y = 2*(canvas.height-event.clientY)/canvas.height-1;
+      setRotationMatrix( cam_x,  cam_y);
+    } );
 
     render();
 };
@@ -216,6 +238,8 @@ function handleTextureLoaded(image, texture) {
         gl.UNSIGNED_BYTE, image);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   gl.bindTexture(gl.TEXTURE_2D, null);
 }
 
@@ -303,6 +327,9 @@ var baseXform;
 function render(){
   gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+  setRotationMatrix(cam_x, cam_y);
+  gl.uniformMatrix4fv(rotationMatrixLoc, false, flatten(rotationMatrix));
+
   if (mode == 1){
     theta1[axis] += 2.0;
   }
@@ -341,4 +368,17 @@ function render(){
   gl.drawElements( gl.TRIANGLES, 72, gl.UNSIGNED_SHORT, 0);
 
   requestAnimFrame( render );
+}
+
+function setRotationMatrix( x,  y)
+{
+  if (!(x == 0 || y == 0))
+  {
+    var vec1 = vec4(x, y, 0, 0);
+    var vec2 = subtract(origin, eye);
+    var perp = normalize(cross(vec2, vec1));
+    var angle = 2*length(vec1);
+    var rot = rotate(angle, perp);
+    rotationMatrix = mult(rot, rotationMatrix);
+  }
 }

@@ -19,9 +19,9 @@ varying float shade; // A 4-vector given to the rasterizer
 // uniform  vec4 baseColor;
 // Look vector.
 uniform  vec4 vLook;
-
 uniform vec3 theta;
 uniform mat4 instanceXform;
+uniform mat4 cameraRotation;
 
 void
 main()
@@ -46,7 +46,7 @@ main()
       0.0,  0.0, 1.0, 0.0,
       0.0,  0.0, 0.0, 1.0 );
 
-  gl_Position = rz * ry * rx * instanceXform * vPosition;
+  gl_Position = cameraRotation * rz * ry * rx * instanceXform * vPosition;
   // apply instance transformation and then world-to-canonical view transform
 
   // Transform and normalize the normal vector. Shades each triangle's color
