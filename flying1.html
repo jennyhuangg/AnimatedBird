@@ -39,7 +39,8 @@ main()
   vec3 c = cos( angles );
   vec3 s = sin( angles );
 
-  // Remember: thse matrices are column-major
+  // Rotation matrixes that animate the wings; rotation about y creates the
+  // flapping and rotation about x creates the initial upward tilt of the bird
   mat4 rx = mat4( 1.0,  0.0,  0.0, 0.0,
       0.0,  c.x,  s.x, 0.0,
       0.0, -s.x,  c.x, 0.0,
@@ -80,13 +81,17 @@ precision mediump float; // set precision of floating-point variables to mediump
 
 varying float shade;
 varying  vec2 fTexCoord;
+
+// sample of texture image for input texture coordinates
 uniform sampler2D texture;
 
 void
 main()
 {
+    // Use texture to determine color of each fragment, then multiply
+    // but shading factor
     gl_FragColor = texture2D( texture, fTexCoord ) * shade ;
-    gl_FragColor.w = 1.;
+    gl_FragColor.w = 1.; // set alpha = 1
 }
 </script>
 
