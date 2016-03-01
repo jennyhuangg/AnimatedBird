@@ -289,4 +289,3 @@ function bird() {
     tris: tris,
     norms: norms
   };
-}
