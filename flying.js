@@ -233,7 +233,7 @@ function render(){
 
 function setRotationMatrix( x,  y)
 {
-  if (!(x == 0 || y == 0))
+  if (!(x == 0 && y == 0))
   {
     var vec1 = vec4(x, y, 0, 0);
     var vec2 = subtract(origin, eye);
