@@ -39,8 +39,8 @@ Unmodified helper code:
 
 --------------------------------------------------------------------------------
 
-  Our program supports texturing, animation, and two-dimensional mouse
-navigation. The demo program shows a feather-textured bird flapping its wings,
+  Our program supports texturing, animation, and mouse navigation.
+  The demo program shows a feather-textured bird flapping its wings,
 and the movement of the mouse can alter the position of the camera around it.
   Texturing has become increasingly more important in design. Thus, rather than
 the standard solid coloring, the bird is colored with a feathers from a textured
@@ -54,10 +54,15 @@ from the tutorial and example code on the Mozilla Developer Network was very
 helpful for coding the texturization [1].
   Because birds fly, we animated the bird wings so that they flap. We did this
 by repeatedly multiplying its vertices' locations by a matrix that rotated them
-up and down around the center of the bird.
+up and down about the y axis that passes through the center of the bird.
   So that the user can see the bird from different angles, we implemented
-two-dimensional mouse navigation. The bird's rotation corresponds to the
-change in x and y position of the hovering mouse.
+mouse navigation that allows the camera to pan around the bird. The location of
+the mouse specifies a vector in space (x, y, 0) that is perpendicular to the
+camera-centric vector (0, 0, 1). The axis of the panning rotation is the vector
+perpendicular to these two vectors. The angle of panning in each frame is
+proportional to the distance of (x, y) from the origin. We used the
+rotate(angle, axis) function in MV.js to get the rotation matrix due to camera
+panning.
 --------------------------------------------------------------------------------
 
 References:
